@@ -1,4 +1,5 @@
-pragma solidity ^0.4.18;
+pragma solidity 0.7.4;
+pragma experimental ABIEncoderV2;
 
 import './OwnableProxied.sol';
 import './OwnableUpgradeable.sol';
@@ -18,7 +19,7 @@ contract OwnableProxy is OwnableProxied {
      * contracts
      * @param _target - The target Upgradeable contracts address
      */
-    function upgradeTo(address _target) public onlyOwner {
+    function upgradeTo(address _target) public override onlyOwner {
         assert(target != _target);
 
         address oldTarget = target;
@@ -30,23 +31,23 @@ contract OwnableProxy is OwnableProxied {
     /*
      * @notice Performs an upgrade and then executes a transaction. Intended use to upgrade and initialize atomically
      */
-    function upgradeTo(address _target, bytes _data) public onlyOwner {
-        upgradeTo(_target);
-        assert(target.delegatecall(_data));
-    }
+    // function upgradeTo(address _target, bytes memory _data) public onlyOwner {
+    //     upgradeTo(_target);
+    //     assert(target.delegatecall(_data));
+    // }
 
     /*
      * @notice Fallback function that will execute code from the target contract to process a function call.
      * @dev Will use the delegatecall opcode to retain the current state of the Proxy contract and use the logic
      * from the target contract to process it.
      */
-    function () payable public {
+    fallback () external payable{
         bytes memory data = msg.data;
         address impl = target;
 
         assembly {
-            let result := delegatecall(gas, impl, add(data, 0x20), mload(data), 0, 0)
-            let size := returndatasize
+            let result := delegatecall(gas(), impl, add(data, 0x20), mload(data), 0, 0)
+            let size := returndatasize()
 
             let ptr := mload(0x40)
             returndatacopy(ptr, 0, size)

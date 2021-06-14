@@ -1,4 +1,5 @@
-pragma solidity ^0.4.18;
+pragma solidity 0.7.4;
+pragma experimental ABIEncoderV2;
 
 import './Ownable.sol';
 
@@ -18,12 +19,12 @@ import './Ownable.sol';
  * @param initialized - This mapping records which targets have been initialized with the Upgradeable.initialize()
  * function. Target Upgradeable contracts can only be intitialed once.
  */
-contract OwnableProxied is Ownable {
+abstract contract OwnableProxied is Ownable {
   address public target;
   mapping (address => bool) public initialized;
 
   event EventUpgrade(address indexed newTarget, address indexed oldTarget, address indexed admin);
   event EventInitialized(address indexed target);
 
-  function upgradeTo(address _target) public;
+  function upgradeTo(address _target) virtual public;
 }

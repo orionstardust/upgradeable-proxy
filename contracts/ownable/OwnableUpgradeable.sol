@@ -1,4 +1,5 @@
-pragma solidity ^0.4.18;
+pragma solidity 0.7.4;
+pragma experimental ABIEncoderV2;
 
 import './OwnableProxied.sol';
 
@@ -6,6 +7,7 @@ contract OwnableUpgradeable is OwnableProxied {
     /*
      * @notice Modifier to make body of function only execute if the contract has not already been initialized.
      */
+    address payable public proxy;
     modifier initializeOnceOnly() {
          if(!initialized[target]) {
              initialized[target] = true;
@@ -14,11 +16,16 @@ contract OwnableUpgradeable is OwnableProxied {
          } else revert();
      }
 
+    modifier onlyProxy() {
+        require(msg.sender == proxy);
+        _;
+    }
+
     /**
      * @notice Will always fail if called. This is used as a placeholder for the contract ABI.
      * @dev This is code is never executed by the Proxy using delegate call
      */
-    function upgradeTo(address) public {
+    function upgradeTo(address) override public {
         assert(false);
     }
 
@@ -32,7 +39,11 @@ contract OwnableUpgradeable is OwnableProxied {
      * from being initialized more than once.
      * If a contract is upgraded twice, pay special attention that the state variables are not initialized again
      */
-    function initialize() initializeOnceOnly public {
+    /*function initialize() initializeOnceOnly public {
         // initialize contract state variables here
+    }*/
+
+    function setProxy(address payable theAddress) public onlyOwner {
+        proxy = theAddress;
     }
 }
